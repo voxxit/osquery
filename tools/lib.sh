@@ -10,6 +10,7 @@
 ORACLE_RELEASE=/etc/oracle-release
 SYSTEM_RELEASE=/etc/system-release
 LSB_RELEASE=/etc/lsb-release
+GENTOO_RELEASE=/etc/gentoo-release
 
 function platform() {
   local  __out=$1
@@ -28,6 +29,9 @@ function platform() {
   elif [[ -f "$LSB_RELEASE" ]] && grep -q 'DISTRIB_ID=Ubuntu' $LSB_RELEASE; then
     FAMILY="debian"
     eval $__out="ubuntu"
+  elif [[ -n `grep -o "Gentoo Base System" $GENTOO_RELEASE 2>/dev/null` ]]; then
+    FAMILY="gentoo"
+    eval $__out="gentoo"
   else
     eval $__out=`uname -s | tr '[:upper:]' '[:lower:]'`
   fi
@@ -50,6 +54,8 @@ function distro() {
     eval $__out=`grep -o "release 20[12][0-9]\.[0-9][0-9]" $SYSTEM_RELEASE | sed 's/release /amazon/g'`
   elif [[ $1 = "ubuntu" ]]; then
     eval $__out=`awk -F= '/DISTRIB_CODENAME/ { print $2 }' $LSB_RELEASE`
+  elif [[ $1 = "gentoo" ]]; then
+    eval $__out=`egrep -o "release ([0-9]{1,}\.)+[0-9]{1,}" $GENTOO_RELEASE | sed 's/release /gentoo/g'`
   elif [[ $1 = "darwin" ]]; then
     eval $__out=`sw_vers -productVersion | awk -F '.' '{print $1 "." $2}'`
   elif [[ $1 = "freebsd" ]]; then
